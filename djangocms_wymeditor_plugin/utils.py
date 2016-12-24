@@ -1,18 +1,18 @@
 import html5lib
 import re
 
-from html5lib import sanitizer, serializer, treebuilders, treewalkers
+from html5lib import serializer, treebuilders, treewalkers
 
 from django.template.defaultfilters import force_escape
 
 from cms.models import CMSPlugin
-from cms.plugins.utils import downcast_plugins
+from cms.utils.plugins import downcast_plugins
 
-DEFAULT_PARSER = html5lib.HTMLParser(tokenizer=sanitizer.HTMLSanitizer,
-                                     tree=treebuilders.getTreeBuilder("dom"))
+#TODO Re-implement the sanitizer
+DEFAULT_PARSER = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder("dom"))
 
 OBJ_TAG_RE = re.compile(u"\{\{ plugin_object (\d+) \}\}")
-OBJ_ADMIN_RE_PATTERN = ur'<img [^>]*\bid="plugin_obj_(\d+)"[^>]*/?>'
+OBJ_ADMIN_RE_PATTERN = r'<img [^>]*\bid="plugin_obj_(\d+)"[^>]*/?>'
 OBJ_ADMIN_RE = re.compile(OBJ_ADMIN_RE_PATTERN)
 
 def plugin_tags_to_admin_html(text):
@@ -107,6 +107,6 @@ def clean_html(data, full=True, parser=DEFAULT_PARSER):
         dom_tree = parser.parseFragment(data)
     walker = treewalkers.getTreeWalker("dom")
     stream = walker(dom_tree)
-    s = serializer.htmlserializer.HTMLSerializer(omit_optional_tags=False,
+    s = serializer.HTMLSerializer(omit_optional_tags=False,
                                                  quote_attr_values=True)
     return u''.join(s.serialize(stream))
